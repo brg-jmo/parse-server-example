@@ -55,11 +55,6 @@ app.get('/test', function(req, res) {
 app.post('/users/new', function(req, res) {
   var verifier = require('google-id-token-verifier');
 
-  console.log("Req: " + util.inspect(req));
-  console.log("Query: " + JSON.stringify(req.query));
-  console.log("ID Token: " + req.query.idToken);
-  console.log("Body: " + req.body);
-
   var clientId = '273173107052-dr7dubsvn22o86k7lu9tlanlm8i6ursj.apps.googleusercontent.com';
   var idToken = 'blah';
   if (req.body) {
