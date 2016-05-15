@@ -1,6 +1,8 @@
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 
+const util = require('util');
+
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
 var path = require('path');
@@ -27,6 +29,11 @@ var api = new ParseServer({
 
 var app = express();
 
+// Parse out the body for POST requests
+var bodyParser = require('body-parser')
+app.use(bodyParser.json()); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ extended: true})); // to support URL-encoded bodies
+
 // Serve static assets from the /public folder
 app.use('/public', express.static(path.join(__dirname, '/public')));
 
@@ -43,6 +50,38 @@ app.get('/', function(req, res) {
 // Remove this before launching your app
 app.get('/test', function(req, res) {
   res.sendFile(path.join(__dirname, '/public/test.html'));
+});
+
+app.post('/users/new', function(req, res) {
+  var verifier = require('google-id-token-verifier');
+
+  console.log("Req: " + util.inspect(req));
+  console.log("Query: " + JSON.stringify(req.query));
+  console.log("ID Token: " + req.query.idToken);
+  console.log("Body: " + req.body);
+
+  var clientId = '273173107052-dr7dubsvn22o86k7lu9tlanlm8i6ursj.apps.googleusercontent.com';
+  var idToken = 'blah';
+  if (req.body) {
+    console.log("Body ID Token: " + req.body.idToken);
+    idToken = req.body.idToken;
+  }
+
+  verifier.verify(idToken, clientId, function (err, tokenInfo) {
+    if (!err) {
+      // use tokenInfo here
+      console.log(tokenInfo);
+    } else {
+      console.log("There was an error: " + err);
+    }
+  });
+
+  var response = {
+    status  : 200,
+    success : 'You did it!'
+  }
+
+  res.end(JSON.stringify(response));
 });
 
 var port = process.env.PORT || 1337;
